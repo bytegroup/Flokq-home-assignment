@@ -67,3 +67,10 @@ Requirements:
 - Error handling (e.g., 400/401/500 responses)
 - Use .env for sensitive data (DB credentials, JWT secret)
 - Database migrations or schema setup script
+
+For extra credit:
+
+- Implement a search API (with pagination and filtering).
+- Add image upload (e.g., Cloudinary or local storage).
+- Add Dockerfile for both frontend and backend.
+- Implement incremental static regeneration (ISR) for Next.js.
