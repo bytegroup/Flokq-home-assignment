@@ -1,35 +1,97 @@
-import axios from "axios"
+import { Metadata } from 'next';
+import { partsAPI } from '@/lib/api';
+import { Part, PartsResponse } from '@/types';
+import Navbar from '@/components/layout/Navbar';
+import PartsGrid from '@/components/parts/PartsGrid';
+import SearchBar from '@/components/parts/SearchBar';
+import Hero from '@/components/layout/Hero';
 
-export const dynamic = "force-dynamic" // force SSR
+export const metadata: Metadata = {
+    title: 'Auto Parts Inventory - Browse All Parts',
+    description: 'Browse our complete inventory of auto parts with detailed specifications',
+};
 
-export default async function HomePage() {
-    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/parts`)
-    console.log(res.data);
-    const parts:[] = res.data?.parts
+// This page uses SSR - data is fetched on every request
+export const dynamic = 'force-dynamic';
+
+interface HomePageProps {
+    searchParams: {
+        page?: string;
+        search?: string;
+        category?: string;
+    };
+}
+
+async function getPartsData(searchParams: HomePageProps['searchParams']): Promise<PartsResponse> {
+    try {
+        const page = parseInt(searchParams.page || '1');
+        const search = searchParams.search;
+        const category = searchParams.category;
+
+        // Server-side fetch using native fetch
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: '12',
+            ...(search && { search }),
+            ...(category && { category }),
+        });
+
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/parts?${params}`,
+            {
+                cache: 'no-store', // Force SSR
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch parts');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching parts:', error);
+        return {
+            parts: [],
+            pagination: {
+                page: 1,
+                limit: 12,
+                total: 0,
+                totalPages: 0,
+            },
+        };
+    }
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+    const data = await getPartsData(searchParams);
 
     return (
-        <main className="p-6">
-            <h1 className="text-3xl font-bold mb-4">Auto Parts</h1>
-            <input
-                type="text"
-                placeholder="Search parts..."
-                className="border rounded px-3 py-2 mb-6 w-full"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {parts.map((part: any) => (
-                    <div key={part.id} className="border rounded-lg p-4 shadow hover:shadow-md">
-                        <h2 className="text-lg font-semibold">{part.name}</h2>
-                        <p>Brand: {part.brand}</p>
-                        <p>Price: ${part.price}</p>
-                        <a
-                            href={`/parts/${part.id}`}
-                            className="text-blue-600 mt-2 inline-block"
-                        >
-                            View Details →
-                        </a>
-                    </div>
-                ))}
-            </div>
-        </main>
-    )
+        <div className="min-h-screen bg-gray-50">
+            <Navbar />
+
+            {/* Hero Section */}
+            <Hero />
+
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Search and Filter Section */}
+                <div className="mb-8">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-6">Browse Parts</h2>
+                    <SearchBar initialSearch={searchParams.search} initialCategory={searchParams.category} />
+                </div>
+
+                {/* Parts Grid */}
+                <PartsGrid
+                    parts={data.parts}
+                    pagination={data.pagination}
+                    currentPage={parseInt(searchParams.page || '1')}
+                    search={searchParams.search}
+                    category={searchParams.category}
+                />
+            </main>
+        </div>
+    );
 }
