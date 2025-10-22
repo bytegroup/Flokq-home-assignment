@@ -1,12 +1,26 @@
-import "./globals.css"
-import { SessionProvider } from "next-auth/react"
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import SessionProvider from '@/components/providers/SessionProvider';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+    title: 'Auto Parts Inventory System',
+    description: 'Manage and browse auto parts inventory',
+    keywords: ['auto parts', 'inventory', 'car parts', 'automotive'],
+};
+
+export default function RootLayout({
+                                       children,
+                                   }: Readonly<{
+    children: React.ReactNode;
+}>) {
     return (
         <html lang="en">
-        <body className="min-h-screen bg-gray-50 text-gray-900">
+        <body className={inter.className}>
         <SessionProvider>{children}</SessionProvider>
         </body>
         </html>
-    )
+    );
 }
