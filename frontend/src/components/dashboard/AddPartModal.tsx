@@ -6,7 +6,8 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {z} from 'zod';
 import {partsAPI} from '@/lib/api';
 import {CreatePartData} from '@/types';
-import {X, Loader2} from 'lucide-react';
+import {X, Loader2, Plus} from 'lucide-react';
+import {useCategories} from "@/hooks/useCategories";
 
 interface AddPartModalProps {
     isOpen: boolean;
@@ -20,22 +21,25 @@ const partSchema = z.object({
     price: z.number().positive('Price must be positive'),
     stock: z.number().int().nonnegative('Stock must be non-negative'),
     category: z.string().min(1, 'Category is required'),
-    imageUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+    imageUrl: z.url('Invalid URL').optional().or(z.literal('')),
 });
 
 type PartFormData = z.infer<typeof partSchema>;
 
-const categories = ['Filters', 'Brakes', 'Ignition', 'Electrical', 'Cooling', 'Accessories', 'Oils'];
-
 export default function AddPartModal({isOpen, onClose, onSuccess}: AddPartModalProps) {
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showNewCategory, setShowNewCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+
+    const { categories, loading: categoriesLoading, addCategory } = useCategories();
 
     const {
         register,
         handleSubmit,
         formState: {errors},
         reset,
+        setValue,
     } = useForm<PartFormData>({
         resolver: zodResolver(partSchema),
         defaultValues: {
@@ -48,10 +52,6 @@ export default function AddPartModal({isOpen, onClose, onSuccess}: AddPartModalP
         },
     });
 
-    useEffect(() => {
-        console.log('Modal isOpen:', isOpen); // Debug log
-    }, [isOpen]);
-
     const onSubmit = async (data: PartFormData) => {
         try {
             setIsSubmitting(true);
@@ -62,6 +62,8 @@ export default function AddPartModal({isOpen, onClose, onSuccess}: AddPartModalP
             await partsAPI.create(data as CreatePartData);
 
             reset();
+            setShowNewCategory(false);
+            setNewCategoryName('');
             onSuccess();
         } catch (err: any) {
             console.error('Error creating part:', err); // Debug log
@@ -71,9 +73,21 @@ export default function AddPartModal({isOpen, onClose, onSuccess}: AddPartModalP
         }
     };
 
+    const handleAddNewCategory = () => {
+        if (newCategoryName.trim()) {
+            const trimmedCategory = newCategoryName.trim();
+            addCategory(trimmedCategory);
+            setValue('category', trimmedCategory);
+            setNewCategoryName('');
+            setShowNewCategory(false);
+        }
+    };
+
     const handleClose = () => {
         reset();
         setError(null);
+        setShowNewCategory(false);
+        setNewCategoryName('');
         onClose();
     };
 
@@ -162,18 +176,71 @@ export default function AddPartModal({isOpen, onClose, onSuccess}: AddPartModalP
                                 <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                                     Category *
                                 </label>
-                                <select
-                                    {...register('category')}
-                                    id="category"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                >
-                                    <option value="">Select category</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat} value={cat}>
-                                            {cat}
-                                        </option>
-                                    ))}
-                                </select>
+
+                                {!showNewCategory ? (
+                                    <div className="space-y-2">
+                                        <select
+                                            {...register('category')}
+                                            id="category"
+                                            disabled={categoriesLoading}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+                                        >
+                                            <option value="">
+                                                {categoriesLoading ? 'Loading categories...' : 'Select category'}
+                                            </option>
+                                            {categories.map((cat) => (
+                                                <option key={cat} value={cat}>
+                                                    {cat}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewCategory(true)}
+                                            className="flex items-center text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                                        >
+                                            <Plus size={16} className="mr-1" />
+                                            Add new category
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={newCategoryName}
+                                                onChange={(e) => setNewCategoryName(e.target.value)}
+                                                placeholder="Enter new category name"
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        handleAddNewCategory();
+                                                    }
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleAddNewCategory}
+                                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                            >
+                                                Add
+                                            </button>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowNewCategory(false);
+                                                setNewCategoryName('');
+                                            }}
+                                            className="text-sm text-gray-600 hover:text-gray-700"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                )}
+
                                 {errors.category && (
                                     <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
                                 )}

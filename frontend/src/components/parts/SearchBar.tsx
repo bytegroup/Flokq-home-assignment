@@ -3,28 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, X } from 'lucide-react';
+import { useCategories } from '@/hooks/useCategories';
 
 interface SearchBarProps {
     initialSearch?: string;
     initialCategory?: string;
 }
 
-const categories = [
-    'All Categories',
-    'Filters',
-    'Brakes',
-    'Ignition',
-    'Electrical',
-    'Cooling',
-    'Accessories',
-    'Oils',
-];
-
 export default function SearchBar({ initialSearch = '', initialCategory = '' }: SearchBarProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [search, setSearch] = useState(initialSearch);
     const [category, setCategory] = useState(initialCategory);
+
+    const { categories, loading } = useCategories();
 
     const handleSearch = () => {
         const params = new URLSearchParams();
@@ -78,10 +70,12 @@ export default function SearchBar({ initialSearch = '', initialCategory = '' }: 
                         id="category"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        disabled={loading}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
                     >
+                        <option value="">All Categories</option>
                         {categories.map((cat) => (
-                            <option key={cat} value={cat === 'All Categories' ? '' : cat}>
+                            <option key={cat} value={cat}>
                                 {cat}
                             </option>
                         ))}

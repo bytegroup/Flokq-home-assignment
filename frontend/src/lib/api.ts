@@ -40,6 +40,11 @@ export const partsAPI = {
         return response.data;
     },
 
+    getCategories: async (): Promise<string[]> => {
+        const response = await axios.get('/parts/categories');
+        return response.data.categories;
+    },
+
     create: async (data: CreatePartData) => {
         const response = await axios.post('/parts', data);
         return response.data;

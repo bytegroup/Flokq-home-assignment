@@ -103,3 +103,12 @@ export const getAnalytics = async (req: Request, res: Response, next: NextFuncti
         next(error);
     }
 };
+
+export const getCategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const categories = await partService.getCategories();
+        res.json({ categories });
+    } catch (error) {
+        next(error);
+    }
+};
