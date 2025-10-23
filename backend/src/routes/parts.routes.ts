@@ -5,7 +5,7 @@ import {
     createPart,
     updatePart,
     deletePart,
-    getAnalytics,
+    getAnalytics, getCategories,
 } from '../controllers/parts.controller';
 import { jwtAuth } from '../middleware/auth';
 
@@ -13,6 +13,7 @@ const router = Router();
 
 // Public routes
 router.get('/', getAllParts);
+router.get('/categories', getCategories);
 router.get('/:id', getPartById);
 
 // Protected routes
