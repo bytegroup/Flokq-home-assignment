@@ -1,76 +1,235 @@
-# Take home assignment
+# Auto Parts Inventory Management System
 
-## Auto Parts Inventory & Ordering System
+A full-stack application for managing auto parts inventory with Next.js 15 and Express.js.
 
-### Goal
+## Features
 
-Build a mini full-stack application for managing and browsing auto parts.
-It should have:
-- A public product listing (SSR + SSG + CSR mix)
-- A simple backend API with authentication and CRUD
-- MySQL as the database
-- Next.js (frontend) and Express.js (backend) communication via REST API
+- 🔐 **Authentication**: JWT-based auth with NextAuth
+- 📊 **Dashboard**: Real-time analytics and CRUD operations
+- 🔍 **Search & Filter**: Dynamic search and category filtering
+- 📱 **Responsive Design**: Mobile-friendly UI with Tailwind CSS
+- ⚡ **Performance**: SSR, SSG, and CSR rendering strategies
+- 🐳 **Docker**: Fully containerized for easy deployment
 
-#### Frontend (Next.js)
+## Tech Stack
 
-Use Next.js (React + TypeScript optional) and demonstrate:
-- SSR (Server-Side Rendering) – e.g., the homepage or product list should be rendered on the server.
-- SSG (Static Site Generation) – e.g., individual product detail pages should be pre-generated at build time.
-- CSR (Client-Side Rendering) – e.g., user dashboard or order creation handled dynamically on the client side.
+### Backend
+- Node.js + Express.js
+- TypeScript
+- MySQL + Prisma ORM
+- Passport.js + JWT
+- Zod validation
+- Jest testing
 
-##### Pages to Include:
+### Frontend
+- Next.js 15
+- TypeScript
+- NextAuth
+- React Hook Form + Zod
+- Tailwind CSS
+- Axios
 
-- / → SSR page showing list of all parts (from backend API)
-- /parts/[id] → SSG page showing product details
-- /dashboard → CSR page (only for logged-in users) showing ability to:
-  - Add, edit, or delete parts
-  - View basic analytics (e.g., total parts, categories count)
- 
-##### Features:
+## Quick Start with Docker
 
-- Responsive design
-- Basic search/filter (client-side)
-- Form validation (React Hook Form, Zod, or similar)
-- API integration via fetch or Axios
-- Authentication via JWT (login, logout, protected routes)
+### Prerequisites
+- Docker Desktop installed
+- Docker Compose installed
 
-#### Backend (Express.js)
+### Run the Application
 
-Use Express.js with MySQL (via Sequelize, Prisma, or Knex).
-Endpoints to Include:
+1. **Clone the repository**
+```bash
+   git clone <your-repo-url>
+   cd <project-folder>
+```
 
-| Method   | Endpoint             | Description                        |
-| -------- | -------------------- | ---------------------------------- |
-| `POST`   | `/api/auth/register` | Register new user                  |
-| `POST`   | `/api/auth/login`    | Login and return JWT               |
-| `GET`    | `/api/parts`         | Get list of all parts              |
-| `GET`    | `/api/parts/:id`     | Get single part details            |
-| `POST`   | `/api/parts`         | Add a new part (auth required)     |
-| `PUT`    | `/api/parts/:id`     | Edit existing part (auth required) |
-| `DELETE` | `/api/parts/:id`     | Delete a part (auth required)      |
+2. **Start all services**
+```bash
+   docker-compose up --build
+```
 
+This will:
+- Start MySQL database
+- Run database migrations
+- Seed initial data
+- Start backend API on port 5000
+- Start frontend on port 3000
 
-##### Tables:
+3. **Access the application**
+    - Frontend: http://localhost:3000
+    - Backend API: http://localhost:5000/api
+    - MySQL: localhost:3307
 
-users
+4. **Default credentials**
+    - Email: `test@example.com`
+    - Password: `password123`
 
-| id | name | email | password_hash | created_at |
+### Stop the Application
+```bash
+docker-compose down
+```
 
-parts
+### Stop and remove all data
+```bash
+docker-compose down -v
+```
 
-| id | name | brand | price | stock | category | created_at |
+## Development Setup
 
-Requirements:
+### Backend
+```bash
+cd auto-parts-backend
+npm install
+cp .env.example .env
+# Update .env with your database credentials
+npm run prisma:migrate
+npm run prisma:seed
+npm run dev
+```
 
-- JWT authentication middleware
-- Proper validation (e.g., Joi, Yup, Zod)
-- Error handling (e.g., 400/401/500 responses)
-- Use .env for sensitive data (DB credentials, JWT secret)
-- Database migrations or schema setup script
+### Frontend
+```bash
+cd auto-parts-frontend
+npm install
+cp .env.local.example .env.local
+# Update .env.local
+npm run dev
+```
 
-For extra credit:
+## API Endpoints
 
-- Implement a search API (with pagination and filtering).
-- Add image upload (e.g., Cloudinary or local storage).
-- Add Dockerfile for both frontend and backend.
-- Implement incremental static regeneration (ISR) for Next.js.
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+
+### Parts (Public)
+- `GET /api/parts` - Get all parts (with pagination, search, filter)
+- `GET /api/parts/:id` - Get single part
+- `GET /api/parts/categories` - Get all categories
+
+### Parts (Protected)
+- `POST /api/parts` - Create new part
+- `PUT /api/parts/:id` - Update part
+- `DELETE /api/parts/:id` - Delete part
+- `GET /api/parts/analytics/overview` - Get analytics
+
+## Project Structure
+```
+.
+├── backend/         # Express.js Backend
+│   ├── src/
+│   │   ├── controllers/       # Request handlers
+│   │   ├── services/          # Business logic
+│   │   ├── repositories/      # Data access layer
+│   │   ├── middleware/        # Custom middleware
+│   │   ├── routes/            # API routes
+│   │   └── types/             # TypeScript types
+│   ├── prisma/
+│   │   ├── schema.prisma      # Database schema
+│   │   └── seed.ts            # Seed data
+│   └── Dockerfile
+│
+├── frontend/        # Next.js Frontend
+│   ├── src/
+│   │   ├── app/               # Next.js pages
+│   │   ├── components/        # React components
+│   │   ├── lib/               # Utilities & API client
+│   │   ├── hooks/             # Custom React hooks
+│   │   └── types/             # TypeScript types
+│   └── Dockerfile
+│
+└── docker-compose.yml          # Docker orchestration
+```
+
+## Rendering Strategies
+
+- **SSR (Server-Side Rendering)**: Homepage (`/`) - Fetches parts on every request
+- **SSG (Static Site Generation)**: Part details (`/parts/[id]`) - Pre-generated at build time
+- **CSR (Client-Side Rendering)**: Dashboard (`/dashboard`) - Dynamic client-side data fetching
+
+## Testing
+
+### Backend Tests
+```bash
+cd auto-parts-backend
+npm test
+```
+
+### Run Specific Tests
+```bash
+npm run test:unit        # Unit tests only
+npm run test:integration # Integration tests only
+```
+
+## Environment Variables
+
+### Backend (.env)
+```env
+DATABASE_URL=mysql://user:password@localhost:3306/autoparts_db
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+PORT=5000
+FRONTEND_URL=http://localhost:3000
+```
+
+### Frontend (.env.local)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-nextauth-secret
+```
+
+## Production Deployment
+
+1. Update environment variables for production
+2. Use strong secrets for JWT and NextAuth
+3. Configure proper CORS settings
+4. Set up SSL/TLS certificates
+5. Use a reverse proxy (Nginx)
+6. Enable rate limiting
+7. Set up monitoring and logging
+
+## Troubleshooting
+
+### Docker Issues
+
+**Ports already in use:**
+```bash
+# Stop conflicting services
+docker-compose down
+# Change ports in docker-compose.yml
+```
+
+**Database connection issues:**
+```bash
+# Check if MySQL is ready
+docker-compose logs mysql
+# Restart services
+docker-compose restart backend
+```
+
+**Clear all data and restart:**
+```bash
+docker-compose down -v
+docker-compose up --build
+```
+
+### Development Issues
+
+**Prisma Client out of sync:**
+```bash
+npx prisma generate
+```
+
+**Database schema changes:**
+```bash
+npx prisma migrate dev
+```
+
+## License
+
+MIT
+
+## Author
+
+Your Name
