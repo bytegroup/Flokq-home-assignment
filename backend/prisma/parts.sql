@@ -1,3 +1,4 @@
+
 INSERT INTO parts (name, brand, price, stock, category, image_url)
 VALUES ('Engine Oil Filter', 'Bosch', 12.99, 120, 'Engine', 'https://example.com/images/oil-filter.jpg'),
        ('Spark Plug Set', 'NGK', 24.50, 80, 'Engine', 'https://example.com/images/spark-plug.jpg'),
@@ -744,3 +745,5 @@ VALUES ('Engine Oil Filter', 'Bosch', 12.99, 120, 'Engine', 'https://example.com
        ('Fire Extinguisher 537', 'Guardian', 157.71, 10, 'Safety',
         'https://example.com/images/fire-extinguisher-537.jpg'),
        ('Seat Belt Cutter 511', 'RoadSafe', 45.53, 37, 'Safety', 'https://example.com/images/seat-belt-cutter-511.jpg');
+INSERT INTO users (name, email, password_hash)
+VALUES ('test', 'test@example.com', '$2b$10$o5fKoObdV5BeVZOvSEj3He/LOO1pkkNgzfUHSSwIJh.uR.lqhES8i');

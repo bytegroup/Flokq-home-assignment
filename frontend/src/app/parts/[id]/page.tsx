@@ -14,7 +14,7 @@ interface PartPageProps {
 export async function generateStaticParams() {
     try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/parts?limit=100`,
+            `${process.env.API_BASE_URL}/parts?limit=100`,
             { cache: 'no-store' }
         );
 
@@ -38,7 +38,7 @@ export async function generateStaticParams() {
 async function getPartData(id: string): Promise<Part | null> {
     try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/parts/${id}`,
+            `${process.env.API_BASE_URL}/parts/${id}`,
             {
                 next: { revalidate: 60 }, // Revalidate every 60 seconds (ISR)
             }

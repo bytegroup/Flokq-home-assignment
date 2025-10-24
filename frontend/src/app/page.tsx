@@ -34,7 +34,7 @@ async function getPartsData(searchParams: HomePageProps['searchParams']): Promis
             ...(category && { category }),
         });
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const apiUrl = process.env.API_BASE_URL;
         const response = await fetch(
             `${apiUrl}/parts?${params}`,
             {

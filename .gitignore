@@ -14,7 +14,7 @@ build/
 # Database
 *.db
 *.sqlite
-mysql_data
+mysql_docker_data/*
 
 # Logs
 *.log

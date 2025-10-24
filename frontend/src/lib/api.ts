@@ -76,7 +76,7 @@ export const fetchWithToken = async (url: string, token?: string) => {
         headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+    const response = await fetch(`${process.env.API_BASE_URL}${url}`, {
         headers,
         cache: 'no-store', // For SSR
     });

@@ -45,14 +45,10 @@ A full-stack application for managing auto parts inventory with Next.js 15 and E
 
 2. **Start all services**
 ```bash
-# for backend
-   cd backend
-   docker-compose up --build
-
-# for frontend
-   cd frontend
+   mkdir mysql_docker_data
    docker-compose up --build
 ```
+
 This will:
 - Start MySQL database
 - Run database migrations
@@ -67,7 +63,7 @@ This will:
 
 4. **Default credentials**
     - Email: `test@example.com`
-    - Password: `password123`
+    - Password: `test`
 
 
 ## Development Setup

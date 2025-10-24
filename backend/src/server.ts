@@ -17,8 +17,20 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = [
+    process.env.FRONTEND_URL,        // e.g. http://frontend:3000
+    'http://localhost:3000',         // for local dev outside docker
+    process.env.NEXT_PUBLIC_URL,     // e.g. https://myapp.com in prod
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
 }));
 app.use(express.json());
