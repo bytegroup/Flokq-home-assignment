@@ -45,9 +45,14 @@ A full-stack application for managing auto parts inventory with Next.js 15 and E
 
 2. **Start all services**
 ```bash
+# for backend
+   cd backend
+   docker-compose up --build
+
+# for frontend
+   cd frontend
    docker-compose up --build
 ```
-
 This will:
 - Start MySQL database
 - Run database migrations
@@ -64,23 +69,13 @@ This will:
     - Email: `test@example.com`
     - Password: `password123`
 
-### Stop the Application
-```bash
-docker-compose down
-```
-
-### Stop and remove all data
-```bash
-docker-compose down -v
-```
 
 ## Development Setup
 
 ### Backend
 ```bash
-cd auto-parts-backend
+cd backend
 npm install
-cp .env.example .env
 # Update .env with your database credentials
 npm run prisma:migrate
 npm run prisma:seed
@@ -89,9 +84,8 @@ npm run dev
 
 ### Frontend
 ```bash
-cd auto-parts-frontend
+cd frontend
 npm install
-cp .env.local.example .env.local
 # Update .env.local
 npm run dev
 ```
@@ -151,32 +145,8 @@ npm run dev
 
 ### Backend Tests
 ```bash
-cd auto-parts-backend
+cd backend
 npm test
-```
-
-### Run Specific Tests
-```bash
-npm run test:unit        # Unit tests only
-npm run test:integration # Integration tests only
-```
-
-## Environment Variables
-
-### Backend (.env)
-```env
-DATABASE_URL=mysql://user:password@localhost:3306/autoparts_db
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=7d
-PORT=5000
-FRONTEND_URL=http://localhost:3000
-```
-
-### Frontend (.env.local)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-nextauth-secret
 ```
 
 ## Production Deployment
@@ -188,48 +158,3 @@ NEXTAUTH_SECRET=your-nextauth-secret
 5. Use a reverse proxy (Nginx)
 6. Enable rate limiting
 7. Set up monitoring and logging
-
-## Troubleshooting
-
-### Docker Issues
-
-**Ports already in use:**
-```bash
-# Stop conflicting services
-docker-compose down
-# Change ports in docker-compose.yml
-```
-
-**Database connection issues:**
-```bash
-# Check if MySQL is ready
-docker-compose logs mysql
-# Restart services
-docker-compose restart backend
-```
-
-**Clear all data and restart:**
-```bash
-docker-compose down -v
-docker-compose up --build
-```
-
-### Development Issues
-
-**Prisma Client out of sync:**
-```bash
-npx prisma generate
-```
-
-**Database schema changes:**
-```bash
-npx prisma migrate dev
-```
-
-## License
-
-MIT
-
-## Author
-
-Your Name

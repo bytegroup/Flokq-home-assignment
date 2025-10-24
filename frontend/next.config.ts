@@ -7,6 +7,10 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: false,
     },
+    // Add these for proper standalone build
+    experimental: {
+        outputFileTracingRoot: undefined,
+    },
 }
 
 module.exports = nextConfig

@@ -2,7 +2,10 @@ import NextAuth, { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Support both local dev and Docker
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+    || process.env.API_URL
+    || 'http://localhost:5000/api';
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -10,16 +13,15 @@ export const authOptions: NextAuthOptions = {
             id: 'credentials',
             name: 'Credentials',
             credentials: {
-                email: { label: 'Email', type: 'email', placeholder: 'email@example.com' },
+                email: { label: 'Email', type: 'email' },
                 password: { label: 'Password', type: 'password' },
             },
             async authorize(credentials): Promise<User | null> {
                 try {
                     if (!credentials?.email || !credentials?.password) {
-                        throw new Error('Email and password required');
+                        return null;
                     }
 
-                    // Call backend login API
                     const response = await axios.post(`${API_URL}/auth/login`, {
                         email: credentials.email,
                         password: credentials.password,
@@ -39,14 +41,13 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 } catch (error: any) {
                     console.error('Authentication error:', error.response?.data || error.message);
-                    throw new Error(error.response?.data?.error || 'Authentication failed');
+                    return null;
                 }
             },
         }),
     ],
     callbacks: {
         async jwt({ token, user, trigger, session }) {
-            // Initial sign in
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
@@ -54,7 +55,6 @@ export const authOptions: NextAuthOptions = {
                 token.accessToken = (user as any).accessToken;
             }
 
-            // Handle session update
             if (trigger === 'update' && session) {
                 token = { ...token, ...session };
             }
@@ -73,14 +73,13 @@ export const authOptions: NextAuthOptions = {
     },
     pages: {
         signIn: '/login',
-        error: '/login',
     },
     session: {
         strategy: 'jwt',
-        maxAge: 7 * 24 * 60 * 60, // 7 days
+        maxAge: 7 * 24 * 60 * 60,
     },
     secret: process.env.NEXTAUTH_SECRET,
-    debug: process.env.NODE_ENV === 'development',
+    debug: false, // Set to false to prevent verbose logging
 };
 
 const handler = NextAuth(authOptions);

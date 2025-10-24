@@ -1,56 +1,37 @@
-# Stage 1: Dependencies
-FROM node:22-alpine AS deps
+# Stage 1: Build
+FROM node:20-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY .env .env
 
 # Install dependencies
 RUN npm ci
 
-# Stage 2: Builder
-FROM node:22-alpine AS builder
-
-WORKDIR /app
-
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-
 # Copy source code
 COPY . .
 
-# Set build-time environment variables
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Build the application
+# Build Next.js app
 RUN npm run build
 
-# Stage 3: Production
-FROM node:18-alpine AS runner
+# Stage 2: Production
+FROM node:20-alpine
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy necessary files
+# Copy only necessary files from builder
+COPY --from=builder /app/.next/standalone .
+COPY --from=builder /app/.next/static .next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.env ./.env
 
-# Set ownership
-RUN chown -R nextjs:nodejs /app
-
-USER nextjs
-
+# Expose port
 EXPOSE 3000
 
-ENV PORT 3000
-
+# Run the server
 CMD ["node", "server.js"]

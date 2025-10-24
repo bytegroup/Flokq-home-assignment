@@ -1,6 +1,11 @@
-export { default } from 'next-auth/middleware';
+import { withAuth } from 'next-auth/middleware';
 
-// Protect dashboard routes
+export default withAuth({
+    pages: {
+        signIn: '/login',
+    },
+});
+
 export const config = {
-    matcher: ['/dashboard/:path*'],
+    matcher: ['/dashboard/:path*'], // ONLY protect dashboard
 };

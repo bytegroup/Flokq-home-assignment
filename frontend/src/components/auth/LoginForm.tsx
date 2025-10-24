@@ -4,20 +4,21 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuth } from '@/hooks/useAuth';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { LoginData } from '@/types';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 // Validation Schema
 const loginSchema = z.object({
-    email: z.email('Invalid email address'),
+    email: z.string().email('Invalid email address'),
     password: z.string().min(4, 'Password must be at least 4 characters'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-    const { login } = useAuth();
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -39,11 +40,25 @@ export default function LoginForm() {
         setIsLoading(true);
 
         try {
-            await login(data as LoginData);
-            // Redirect handled by useAuth hook
+            const result = await signIn('credentials', {
+                email: data.email,
+                password: data.password,
+                redirect: false, // Important: prevent automatic redirect
+            });
+
+            if (result?.error) {
+                setError('Invalid email or password');
+                setIsLoading(false);
+                return;
+            }
+
+            if (result?.ok) {
+                // Manually redirect to dashboard on success
+                router.push('/dashboard');
+                router.refresh();
+            }
         } catch (err: any) {
-            setError(err.message || 'Invalid email or password');
-        } finally {
+            setError(err.message || 'An error occurred during login');
             setIsLoading(false);
         }
     };
@@ -67,7 +82,8 @@ export default function LoginForm() {
                     id="email"
                     type="email"
                     autoComplete="email"
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition ${
+                    disabled={isLoading}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:bg-gray-100 ${
                         errors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="john@example.com"
@@ -88,7 +104,8 @@ export default function LoginForm() {
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         autoComplete="current-password"
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition ${
+                        disabled={isLoading}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:bg-gray-100 ${
                             errors.password ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="••••••••"
@@ -96,7 +113,8 @@ export default function LoginForm() {
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
                     >
                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>

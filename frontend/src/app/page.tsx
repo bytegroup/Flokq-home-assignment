@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { partsAPI } from '@/lib/api';
 import { Part, PartsResponse } from '@/types';
 import Navbar from '@/components/layout/Navbar';
 import PartsGrid from '@/components/parts/PartsGrid';
@@ -28,7 +27,6 @@ async function getPartsData(searchParams: HomePageProps['searchParams']): Promis
         const search = searchParams.search;
         const category = searchParams.category;
 
-        // Server-side fetch using native fetch
         const params = new URLSearchParams({
             page: page.toString(),
             limit: '12',
@@ -36,10 +34,11 @@ async function getPartsData(searchParams: HomePageProps['searchParams']): Promis
             ...(category && { category }),
         });
 
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/parts?${params}`,
+            `${apiUrl}/parts?${params}`,
             {
-                cache: 'no-store', // Force SSR
+                cache: 'no-store',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -71,19 +70,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     return (
         <div className="min-h-screen bg-gray-50">
             <Navbar />
-
-            {/* Hero Section */}
             <Hero />
 
-            {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {/* Search and Filter Section */}
                 <div className="mb-8">
                     <h2 className="text-3xl font-bold text-gray-900 mb-6">Browse Parts</h2>
                     <SearchBar initialSearch={searchParams.search} initialCategory={searchParams.category} />
                 </div>
 
-                {/* Parts Grid */}
                 <PartsGrid
                     parts={data.parts}
                     pagination={data.pagination}
