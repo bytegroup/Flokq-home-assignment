@@ -9,3 +9,4 @@ coverage
 .idea
 README.md
 mysql_docker_data/*
+/generated/prisma
